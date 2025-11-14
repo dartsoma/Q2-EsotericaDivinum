@@ -260,6 +260,53 @@ typedef struct gitem_s
 	char *precaches; /* string of all models, sounds, and images this item will use */
 } gitem_t;
 
+// Esoterica
+
+
+typedef struct {
+
+	int eventID;
+	char eventDesc[512];
+	float weight;
+
+} e_events_t;
+
+// I need to nest e_node using the initilized version of it
+typedef struct e_node{
+
+	e_events_t* event;
+	float frameCreated;
+	struct e_node* next;
+
+} e_node_t;
+
+
+typedef struct {
+
+	e_node_t* firstNode;
+	e_node_t* currNode;
+	e_node_t* nextNode;
+	float endFrame;
+	float nextEventFrame;
+
+} e_manager_t;
+
+#define ESO_POSESSED { .eventID = 444, .eventDesc = "You feel yourself losing control", .weight = 0.8}
+#define ESO_BIRTHDAY { .eventID = 365, .eventDesc = "H", .weight = 0.365}
+#define ESO_BLESSED { .eventID = 373, .eventDesc = "He watches over you" .weight = 0.2 }
+#define ESO_BORING { .eventID = 111, .eventDesc = "And nothing happened", .weight = 0.5 }
+#define ESO_SECONDCHANCES { .eventID = 777, eventDesc = "He watches over you... intensely", .weight = 0.01 }
+
+
+
+extern e_events_t eEvent;
+extern e_node_t eNode;
+extern e_manager_t eManager;
+
+
+
+
+
 /* this structure is left intact through an entire game
    it should be initialized at dll load time, and read/written to
    the server.ssv file for savegames */
@@ -596,6 +643,8 @@ typedef struct
 
 extern field_t fields[];
 extern gitem_t itemlist[];
+
+
 
 /* player/client.c */
 void ClientBegin(edict_t *ent);

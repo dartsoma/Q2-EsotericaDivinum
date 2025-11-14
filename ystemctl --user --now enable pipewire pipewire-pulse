@@ -1,0 +1,53 @@
+[0;1;32m●[0m pipewire.service - PipeWire Multimedia Service
+     Loaded: loaded (]8;;file://fedora/usr/lib/systemd/user/pipewire.service\/usr/lib/systemd/user/pipewire.service]8;;\; [0;1;38:5:185mdisabled[0m; preset: [0;1;38:5:185mdisabled[0m)
+    Drop-In: /usr/lib/systemd/user/pipewire.service.d
+             └─]8;;file://fedora/usr/lib/systemd/user/pipewire.service.d/00-uresourced.conf\00-uresourced.conf]8;;\
+             /usr/lib/systemd/user/service.d
+             └─]8;;file://fedora/usr/lib/systemd/user/service.d/10-timeout-abort.conf\10-timeout-abort.conf]8;;\
+     Active: [0;1;32mactive (running)[0m since Wed 2025-11-12 13:59:07 EST; 3min 50s ago
+ Invocation: 1e76035c623f43c0aadec968f93ec081
+TriggeredBy: [0;1;32m●[0m pipewire.socket
+   Main PID: 11807 (pipewire)
+      Tasks: 3[0;38;5;245m (limit: 37849)[0m
+     Memory: 10.2M (peak: 13M)
+        CPU: 834ms
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/pipewire.service
+             └─[0;38;5;245m11807 /usr/bin/pipewire[0m
+
+Nov 12 13:59:07 fedora systemd[11670]: Started pipewire.service - PipeWire Multimedia Service.
+
+[0;1;32m●[0m pipewire-pulse.service - PipeWire PulseAudio
+     Loaded: loaded (]8;;file://fedora/usr/lib/systemd/user/pipewire-pulse.service\/usr/lib/systemd/user/pipewire-pulse.service]8;;\; [0;1;38:5:185mdisabled[0m; preset: [0;1;38:5:185mdisabled[0m)
+    Drop-In: /usr/lib/systemd/user/service.d
+             └─]8;;file://fedora/usr/lib/systemd/user/service.d/10-timeout-abort.conf\10-timeout-abort.conf]8;;\
+     Active: [0;1;32mactive (running)[0m since Wed 2025-11-12 13:59:10 EST; 3min 47s ago
+ Invocation: 3ead294ca0fb4ce088ccda397c914a2c
+TriggeredBy: [0;1;32m●[0m pipewire-pulse.socket
+   Main PID: 12504 (pipewire-pulse)
+      Tasks: 3[0;38;5;245m (limit: 37849)[0m
+     Memory: 20.4M (peak: 21.9M)
+        CPU: 699ms
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/pipewire-pulse.service
+             └─[0;38;5;245m12504 /usr/bin/pipewire-pulse[0m
+
+Nov 12 13:59:10 fedora systemd[11670]: Started pipewire-pulse.service - PipeWire PulseAudio.
+
+[0;1;32m●[0m wireplumber.service - Multimedia Service Session Manager
+     Loaded: loaded (]8;;file://fedora/usr/lib/systemd/user/wireplumber.service\/usr/lib/systemd/user/wireplumber.service]8;;\; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+    Drop-In: /usr/lib/systemd/user/service.d
+             └─]8;;file://fedora/usr/lib/systemd/user/service.d/10-timeout-abort.conf\10-timeout-abort.conf]8;;\
+     Active: [0;1;32mactive (running)[0m since Wed 2025-11-12 13:59:07 EST; 3min 50s ago
+ Invocation: a06294a1f42543228a22511cc1de4eb9
+   Main PID: 11809 (wireplumber)
+      Tasks: 9[0;38;5;245m (limit: 37849)[0m
+     Memory: 8.7M (peak: 9.8M)
+        CPU: 4.552s
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/wireplumber.service
+             └─[0;38;5;245m11809 /usr/bin/wireplumber[0m
+
+Nov 12 13:59:07 fedora systemd[11670]: Started wireplumber.service - Multimedia Service Session Manager.
+Nov 12 13:59:07 fedora wireplumber[11809]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 13:59:07 fedora wireplumber[11809]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 13:59:07 fedora wireplumber[11809]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 13:59:07 fedora wireplumber[11809]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 13:59:09 fedora wireplumber[11809]: [0:09:28.910185387] [11809]  INFO Camera camera_manager.cpp:327 libcamera v0.4.0

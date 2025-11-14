@@ -1,0 +1,19 @@
+[0;1;32m●[0m wireplumber.service - Multimedia Service Session Manager
+     Loaded: loaded (]8;;file://fedora/usr/lib/systemd/user/wireplumber.service\/usr/lib/systemd/user/wireplumber.service]8;;\; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+    Drop-In: /usr/lib/systemd/user/service.d
+             └─]8;;file://fedora/usr/lib/systemd/user/service.d/10-timeout-abort.conf\10-timeout-abort.conf]8;;\
+     Active: [0;1;32mactive (running)[0m since Wed 2025-11-12 14:34:19 EST; 4s ago
+ Invocation: feb77671f48442de8bfe5dfb92360908
+   Main PID: 5029 (wireplumber)
+      Tasks: 11[0;38;5;245m (limit: 37849)[0m
+     Memory: 8.4M (peak: 9.2M)
+        CPU: 1.700s
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/wireplumber.service
+             └─[0;38;5;245m5029 /usr/bin/wireplumber[0m
+
+Nov 12 14:34:19 fedora systemd[2188]: Started wireplumber.service - Multimedia Service Session Manager.
+Nov 12 14:34:19 fedora wireplumber[5029]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 14:34:19 fedora wireplumber[5029]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 14:34:19 fedora wireplumber[5029]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 14:34:19 fedora wireplumber[5029]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mwp-event-dispatcher: wp_event_dispatcher_unregister_hook: assertion 'already_registered_dispatcher == self' failed[0m
+Nov 12 14:34:21 fedora wireplumber[5029]: [0:02:30.198830281] [5029]  INFO Camera camera_manager.cpp:327 libcamera v0.4.0

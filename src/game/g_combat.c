@@ -506,11 +506,14 @@ apply_knockback(edict_t *targ, vec3_t dir, float knockback, float scale)
 {
 	vec3_t kvel;
 	float mass;
+	vec3_t jump;
+
 
 	if (!knockback)
 	{
 		return;
 	}
+
 
 	mass = (targ->mass < 50) ? 50.0f : (float)targ->mass;
 
@@ -530,6 +533,13 @@ T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker,
 	int asave;
 	int psave;
 	int te_sparks;
+
+	if(damage == 0 && targ->client){
+		vec3_t newDir = {targ->client->ps.viewangles[PITCH], targ->client->ps.viewangles[YAW], targ->client->ps.viewangles[ROLL]};
+		apply_knockback (targ, newDir, knockback, -300.0f);
+		return;
+
+	}
 
 	if (!targ || !inflictor || !attacker)
 	{
@@ -721,6 +731,7 @@ T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage,
 	vec3_t v;
 	vec3_t dir;
 
+
 	if (!inflictor || !attacker)
 	{
 		return;
@@ -757,6 +768,11 @@ T_RadiusDamage(edict_t *inflictor, edict_t *attacker, float damage,
 						vec3_origin, (int)points, (int)points, DAMAGE_RADIUS,
 						mod);
 			}
+		} else {
+
+			T_Damage(ent, inflictor, attacker, dir, inflictor->s.origin,
+					 vec3_origin, 0, 200, DAMAGE_RADIUS,
+					 mod);
 		}
 	}
 }

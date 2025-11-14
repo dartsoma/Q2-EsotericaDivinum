@@ -784,7 +784,7 @@ rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 		else
 		{
 			T_Damage(other, ent, ent->owner, ent->velocity, ent->s.origin,
-					vec3_origin, ent->dmg, 0, 0, MOD_ROCKET);
+					vec3_origin, 0, 9, 0, MOD_ROCKET);
 		}
 	}
 	else
@@ -808,6 +808,7 @@ rocket_touch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius,
 			MOD_R_SPLASH);
+
 
 	gi.WriteByte(svc_temp_entity);
 
