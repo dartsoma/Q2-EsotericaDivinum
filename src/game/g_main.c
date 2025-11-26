@@ -1,4 +1,4 @@
-/*
+	/*
  * Copyright (C) 1997-2001 Id Software, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,6 +90,18 @@ cvar_t *aimfix;
 cvar_t *g_machinegun_norecoil;
 cvar_t *g_swap_speed;
 
+e_events_t ESO_NOTHING = { 0, "Nothing", "", "", 0, 0, 0};
+e_events_t ESO_POSESSED = { 444, "Possessed","Comply will all \n audits for the \n duration\n", "Audits", 0, 10, 0.8};
+e_events_t ESO_BIRTHDAY = { 365, "Birthday", "Collect your presents\n from the bowels\n of the enemy\n", "Presents", 0, 20, 0.365};
+e_events_t ESO_AUDITDAY = { 373, "Auditing Day", "Get touched by\n as few ghosts as possible,\n more watcher spawns\n", "Times Hit", 0, 3, 0.2 };
+e_events_t ESO_BORING = { 111, "Boring", "Don't do anything\n", "n/a", 0, 0, 0.5 };
+e_events_t ESO_GHOSTBUSTERS = { 800, "Ghostbusters", "Kill watchers", "Watchers Killed", 0, 15, 0.01 };
+
+e_events_t eEve[3];
+e_manager_t eMan = {eEve, 0, -1, false};
+
+void e_eventUpdate(void);
+void e_eventSelect(void);
 void G_RunFrame(void);
 
 /* =================================================================== */
@@ -443,14 +455,137 @@ ExitLevel(void)
 /*
  * Advances the world by 0.1 seconds
  */
+
+int e_eventTimer(){
+
+	if(eMan.intermission){
+
+		return (eMan.nextEvent - level.framenum)/10;
+
+	} else {
+
+		return (eMan.endFrame - level.framenum)/10;
+	}
+
+}
+
+char* e_eventName(void){
+
+	return eMan.eventArray[EVE_CURR].eventName;
+}
+
+char* e_eventDesc(void){
+
+	return eMan.eventArray[EVE_CURR].eventDesc;
+}
+
+char* e_objectiveName(void){
+
+	return eMan.eventArray[EVE_CURR].objectiveType;
+}
+
+int e_objectiveNumber(void){
+
+	return eMan.eventArray[EVE_CURR].objectiveNum;
+}
+
+int e_objectiveTotal(void){
+
+	return eMan.eventArray[EVE_CURR].objectiveTotal;
+}
+
+void e_eventUpdate(){
+
+	if(eMan.endFrame <= level.framenum) {
+		e_eventSelect();
+	}
+	return;
+}
+
+
+
+int e_randomMin(){
+
+	int randomNum = (int) (random()*5);
+
+	switch (randomNum){
+
+		case 0:
+			return 50;
+		case 1:
+			return 600*1;
+
+		case 2:
+			return 600*2;
+
+		case 3:
+			return 600*3;
+	}
+}
+
+void e_randomEvent(int eventslot){
+
+	int randomNum = (int) (random()*5);
+
+	switch(randomNum){
+
+		case 0:
+			eMan.eventArray[eventslot] = ESO_POSESSED;
+			break;
+		case 1:
+			eMan.eventArray[eventslot] = ESO_BIRTHDAY;
+			break;
+		case 2:
+			eMan.eventArray[eventslot] = ESO_AUDITDAY;
+			break;
+		case 3:
+			eMan.eventArray[eventslot] = ESO_BORING;
+			break;
+		case 4:
+			eMan.eventArray[eventslot] = ESO_GHOSTBUSTERS;
+			break;
+		default:
+			eMan.eventArray[eventslot] = ESO_NOTHING;
+			break;
+	}
+}
+
+void e_eventSelect(){
+
+	// intiial event
+	if(eMan.nextEvent < eMan.endFrame){
+		eMan.endFrame = level.framenum + e_randomMin();
+		eMan.nextEvent = eMan.endFrame + ((int)200*random());
+		e_randomEvent(EVE_CURR);
+		e_randomEvent(EVE_NEXT);
+	} else if (level.framenum > eMan.endFrame && level.framenum < eMan.nextEvent)
+	// event transition
+	{
+		eMan.intermission = true;
+	} else if (level.framenum >= eMan.nextEvent){
+		eMan.intermission = false;
+		eMan.eventArray[EVE_PREV] = eMan.eventArray[EVE_CURR];
+		eMan.eventArray[EVE_CURR] = eMan.eventArray[EVE_NEXT];
+		e_randomEvent(EVE_NEXT);
+		eMan.endFrame = level.framenum + e_randomMin();
+		eMan.nextEvent = eMan.endFrame + ((int)200*random());
+	}
+
+}
+
+
 void
 G_RunFrame(void)
 {
 	int i;
 	edict_t *ent;
 
+
+
+
 	level.framenum++;
 	level.time = level.framenum * FRAMETIME;
+
 
 	gibsthisframe = 0;
 	debristhisframe = 0;
@@ -481,6 +616,8 @@ G_RunFrame(void)
 
 		VectorCopy(ent->s.origin, ent->s.old_origin);
 
+		e_eventUpdate();
+
 		/* if the ground entity moved, make sure we are still on it */
 		if ((ent->groundentity) &&
 			(ent->groundentity->linkcount != ent->groundentity_linkcount))
@@ -493,7 +630,6 @@ G_RunFrame(void)
 				M_CheckGround(ent);
 			}
 		}
-
 		if ((i > 0) && (i <= maxclients->value))
 		{
 			ClientBeginServerFrame(ent);
@@ -505,10 +641,10 @@ G_RunFrame(void)
 
 	/* see if it is time to end a deathmatch */
 	CheckDMRules();
-
 	/* see if needpass needs updated */
 	CheckNeedPass();
 
 	/* build the playerstate_t structures for all players */
 	ClientEndServerFrames();
+
 }

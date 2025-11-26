@@ -353,7 +353,7 @@ visible(edict_t *self, edict_t *other)
 	spot2[2] += other->viewheight;
 	trace = gi.trace(spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
 
-	if (trace.fraction == 1.0)
+	if (trace.fraction == 1.0 || self->movetype == MOVETYPE_NOCLIP)
 	{
 		return true;
 	}

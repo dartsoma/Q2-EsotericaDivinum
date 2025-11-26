@@ -1382,6 +1382,45 @@ Cmd_SpawnOnStartByClass(char *classname, const vec3_t origin)
 		origin[0], origin[1], origin[2]);
 }
 
+
+static void
+Cmd_SpawnWatcher(edict_t *ent)
+{
+
+	edict_t *opponent = G_Spawn();
+
+	int x = ((int) 100 * random());
+	int y = ((int) 100 * random());
+	int z = ((int) 100 * random());
+
+
+	// set position
+	if (random() < 0.5){
+	opponent->s.origin[0] = ent->s.origin[0] - (400 + x);
+	} else {
+	opponent->s.origin[0] = ent->s.origin[0] + (400 + x);
+	}
+
+	if (random() < 0.5){
+	opponent->s.origin[1] = ent->s.origin[1] - (400 + y);
+	} else {
+	opponent->s.origin[1] = ent->s.origin[1] + (400 + y);
+	}
+	if (random() < 0.5){
+	opponent->s.origin[2] = ent->s.origin[2] - (400 + z);
+	} else {
+	opponent->s.origin[2] = ent->s.origin[2] + (400 + z);
+	}
+
+	// and class
+	opponent->classname = G_CopyString("monster_flyer");
+
+	ED_CallSpawn(opponent);
+
+	gi.dprintf("Spawned Watcher at %f %f %f\n",
+			  ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
+}
+
 static void
 Cmd_SpawnOnStart_f(edict_t *ent)
 {
@@ -1977,6 +2016,9 @@ ClientCommand(edict_t *ent)
 	else if (Q_stricmp(cmd, "listentities") == 0)
 	{
 		Cmd_ListEntities_f(ent);
+	}
+	else if (Q_stricmp(cmd, "spawnwatcher") == 0){
+		Cmd_SpawnWatcher(ent);
 	}
 	else if (Q_stricmp(cmd, "cycleweap") == 0)
 	{

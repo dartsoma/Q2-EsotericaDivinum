@@ -260,51 +260,41 @@ typedef struct gitem_s
 	char *precaches; /* string of all models, sounds, and images this item will use */
 } gitem_t;
 
-// Esoterica
+// Esoterica Divinum
 
 
 typedef struct {
 
 	int eventID;
+	char eventName[50];
 	char eventDesc[512];
+	char objectiveType[50];
+	int objectiveNum;
+	int objectiveTotal;
 	float weight;
 
 } e_events_t;
 
 // I need to nest e_node using the initilized version of it
-typedef struct e_node{
-
-	e_events_t* event;
-	float frameCreated;
-	struct e_node* next;
-
-} e_node_t;
-
 
 typedef struct {
-
-	e_node_t* firstNode;
-	e_node_t* currNode;
-	e_node_t* nextNode;
-	float endFrame;
-	float nextEventFrame;
-
+	e_events_t *eventArray;
+	int endFrame;
+	int nextEvent;
+	qboolean intermission;
 } e_manager_t;
 
-#define ESO_POSESSED { .eventID = 444, .eventDesc = "You feel yourself losing control", .weight = 0.8}
-#define ESO_BIRTHDAY { .eventID = 365, .eventDesc = "H", .weight = 0.365}
-#define ESO_BLESSED { .eventID = 373, .eventDesc = "He watches over you" .weight = 0.2 }
-#define ESO_BORING { .eventID = 111, .eventDesc = "And nothing happened", .weight = 0.5 }
-#define ESO_SECONDCHANCES { .eventID = 777, eventDesc = "He watches over you... intensely", .weight = 0.01 }
+#define EVE_NEXT 2
+#define EVE_CURR 1
+#define EVE_PREV 0
 
-
-
-extern e_events_t eEvent;
-extern e_node_t eNode;
 extern e_manager_t eManager;
-
-
-
+int e_eventTimer(void);
+char* e_eventName(void);
+char* e_eventDesc(void);
+int e_objectiveNumber(void);
+int e_objectiveTotal(void);
+char* e_objectiveName(void);
 
 
 /* this structure is left intact through an entire game

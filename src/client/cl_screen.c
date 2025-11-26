@@ -1277,8 +1277,7 @@ SCR_ExecuteLayoutString(char *s)
 			width = 3;
 			value = cl.frame.playerstate.stats[STAT_HEALTH];
 
-			if (value > 25)
-			{
+			if (value > 25) {
 				color = 0;  /* green */
 			}
 			else if (value > 0)

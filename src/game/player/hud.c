@@ -372,14 +372,14 @@ HelpComputerMessage(edict_t *ent)
 			"xv 202 yv 12 string2 \"%s\" " /* skill */
 			"xv 0 yv 24 cstring2 \"%s\" " /* level name */
 			"xv 0 yv 54 cstring2 \"%s\" " /* help 1 */
-			"xv 0 yv 110 cstring2 \"%s\" " /* help 2 */
-			"xv 50 yv 164 string2 \" kills     goals    secrets\" "
+			"xv 0 yv 105 cstring2 \" Complete missions \n to stay alive \n watch out for ghosts \" " /* help 2 */
+			"xv 50 yv 164 string2 \"%s\""
 			"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
 			sk,
-			level.level_name,
-			game.helpmessage1,
-			game.helpmessage2,
-			level.killed_monsters, level.total_monsters,
+			e_eventName(),
+			e_eventDesc(),
+			e_objectiveName(),
+			e_objectiveNumber(), e_objectiveTotal(),
 			level.found_goals, level.total_goals,
 			level.found_secrets, level.total_secrets);
 
@@ -422,8 +422,7 @@ G_SetStats(edict_t *ent)
 
 	/* health */
 	ent->client->ps.stats[STAT_HEALTH_ICON] = level.pic_health;
-	ent->client->ps.stats[STAT_HEALTH] = (ent->health < -99) ? -99 : ent->health;
-
+	ent->client->ps.stats[STAT_HEALTH] = e_eventTimer() > 0 ? e_eventTimer() : 0;
 	/* ammo */
 	if (!ent->client->ammo_index)
 	{

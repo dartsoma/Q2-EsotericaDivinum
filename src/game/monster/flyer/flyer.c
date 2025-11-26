@@ -255,6 +255,8 @@ flyer_run(edict_t *self)
 		return;
 	}
 
+
+
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
 		self->monsterinfo.currentmove = &flyer_move_stand;
@@ -712,6 +714,61 @@ flyer_nextmove(edict_t *self)
 		self->monsterinfo.currentmove = &flyer_move_run;
 	}
 }
+// esoterica divinum
+void flyer_clip(edict_t *self)
+{
+	if (!self->enemy)
+		self->enemy = level.sight_client;
+
+	// movetogoal
+	self->goalentity = self->enemy;
+
+
+	vec3_t dir;
+	VectorSubtract(self->enemy->s.origin, self->s.origin, dir);
+	VectorNormalize(dir);
+
+
+
+	// self->s.angles[PITCH] = asin(-1*dir[1]);
+	// self->s.angles[YAW] = atan2(dir[1],dir[2]);
+
+	self->s.angles[PITCH] = (int) random()*100 * FRAMETIME;
+	self->s.angles[YAW] = (int) random()*100*FRAMETIME;
+
+	VectorNormalize(dir);
+
+
+	//blatant movement
+	float speed = 45;
+	vec3_t velocity;
+	VectorScale(dir, speed, velocity);
+
+
+
+
+
+
+	// set uniform velocity according to scale for each axis
+
+
+
+
+	for (int i = 0; i < 3; i++) {
+		self->velocity[i] = velocity[i];
+	}
+
+	vec3_t new_origin;
+	for (int i = 0; i < 3; i++) {
+		new_origin[i] = self->s.origin[i] + self->velocity[i] * FRAMETIME;
+	}
+
+	VectorCopy(new_origin, self->s.origin);
+
+	gi.linkentity(self);
+
+	self->nextthink = level.time + FRAMETIME;
+}
 
 void
 flyer_melee(edict_t *self)
@@ -847,8 +904,8 @@ SP_monster_flyer(edict_t *self)
 	self->s.modelindex = gi.modelindex("models/monsters/flyer/tris.md2");
 	VectorSet(self->mins, -16, -16, -24);
 	VectorSet(self->maxs, 16, 16, 32);
-	self->movetype = MOVETYPE_STEP;
-	self->solid = SOLID_BBOX;
+	self->movetype = MOVETYPE_NOCLIP;
+	self->solid = SOLID_NOT;
 
 	self->s.sound = gi.soundindex("flyer/flyidle1.wav");
 
@@ -858,18 +915,19 @@ SP_monster_flyer(edict_t *self)
 	self->pain = flyer_pain;
 	self->die = flyer_die;
 
-	self->monsterinfo.stand = flyer_stand;
-	self->monsterinfo.walk = flyer_walk;
-	self->monsterinfo.run = flyer_run;
-	self->monsterinfo.attack = flyer_attack;
-	self->monsterinfo.melee = flyer_melee;
-	self->monsterinfo.sight = flyer_sight;
-	self->monsterinfo.idle = flyer_idle;
+	self->monsterinfo.stand = flyer_clip;
+	self->monsterinfo.walk = flyer_clip;
+	self->monsterinfo.run = flyer_clip;
+	self->monsterinfo.attack = flyer_clip;
+	self->monsterinfo.melee = flyer_clip;
+	self->monsterinfo.sight = NULL;
+	self->monsterinfo.idle = flyer_clip;
+	self->monsterinfo.scale = MODEL_SCALE;
 
 	gi.linkentity(self);
 
-	self->monsterinfo.currentmove = &flyer_move_stand;
-	self->monsterinfo.scale = MODEL_SCALE;
+	self->think = flyer_clip;
+	self->nextthink = level.time + FRAMETIME;
 
-	flymonster_start(self);
+
 }
