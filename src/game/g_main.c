@@ -97,8 +97,22 @@ e_events_t ESO_AUDITDAY = { 373, "Auditing Day", "Get touched by\n as few ghosts
 e_events_t ESO_BORING = { 111, "Boring", "Don't do anything\n", "n/a", 0, 0, 0.5 };
 e_events_t ESO_GHOSTBUSTERS = { 800, "Ghostbusters", "Kill watchers", "Watchers Killed", 0, 15, 0.01 };
 
+e_audit_t AUD_CURR = {0, 0, 0};
+
+e_audit_t AUD_NONE = {0, 0, -1};
+e_audit_t AUD_TYPING = {3, 0, 0};
+e_audit_t AUD_ACTION = {1, 0, 1};
+e_audit_t AUD_QUIZ = {5, 0, 2};
+
 e_events_t eEve[3];
-e_manager_t eMan = {eEve, 0, -1, false};
+e_manager_t eMan = {eEve, 0, -1, false, &AUD_CURR};
+
+const char* quiz[5] = {"Orange Juice or Apple Juice?", "What game is this?", "What grade will this mod get?", "What are the flying ghosts called?", "Linux or Windows?"};
+const char* qAnswer[5] = {"Cranberry", "Quake 2", "A+" , "Watchers", "Whatever you are paid to use"};
+const char* spelling[7] = {"supercalifragilisticexpialidocious", "mississipi", "sequoia", "honorificabilitudinitatibus", "incomprehensibilities", "llIIIIllIlIlIlIllIlIlllII", "antidisestablishmentarianism"};
+
+char* auditPhrase;
+
 
 void e_eventUpdate(void);
 void e_eventSelect(void);
@@ -496,32 +510,82 @@ int e_objectiveTotal(void){
 
 void e_eventUpdate(){
 
-	if(eMan.endFrame <= level.framenum) {
 		e_eventSelect();
-	}
-	return;
+
+		return;
 }
 
 
+int e_minigameCheck(){
 
-int e_randomMin(){
+	return eMan.currAudit->type;
+}
 
-	int randomNum = (int) (random()*5);
+qboolean e_wordCheck(char* s){
 
-	switch (randomNum){
+if (s == auditPhrase){
+
+	return true;
+
+}
+
+return false;
+
+}
+
+
+void e_giveAudit(edict_t *e){
+
+	int randomNum = (int) (random()*3);
+
+	switch(randomNum)	{
 
 		case 0:
-			return 50;
+			AUD_CURR = AUD_TYPING;
+			break;
 		case 1:
-			return 600*1;
+			AUD_CURR = AUD_ACTION;
+			break;
+		case 2:
+			AUD_CURR = AUD_QUIZ;
+		default:
+			AUD_CURR = AUD_TYPING;
+			break;
+	}
+
+	switch(AUD_CURR.type){
+
+		case 0:
+
+			randomNum = (int) random()*7;
+
+			auditPhrase = quiz[randomNum];
+
+			gi.AddCommandString("toggleconsole\n");
+
+		break;
+
+		case 1:
+
+
+
+		break;
 
 		case 2:
-			return 600*2;
 
-		case 3:
-			return 600*3;
+			randomNum = (int) random()*5;
+
+			auditPhrase = spelling[randomNum];
+
+			gi.AddCommandString("toggleconsole\n");
+
+		break;
 	}
+
+
+	G_FreeEdict(e);
 }
+
 
 void e_randomEvent(int eventslot){
 
@@ -550,12 +614,26 @@ void e_randomEvent(int eventslot){
 	}
 }
 
+
+void e_skipEvent(){
+
+	if (eMan.intermission){
+		eMan.nextEvent = level.framenum + 10;
+		eMan.endFrame = level.framenum + 610;
+	} else {
+
+		eMan.endFrame = level.framenum + 10;
+		eMan.nextEvent = level.framenum + 100;
+	}
+
+}
+
 void e_eventSelect(){
 
 	// intiial event
-	if(eMan.nextEvent < eMan.endFrame){
-		eMan.endFrame = level.framenum + e_randomMin();
-		eMan.nextEvent = eMan.endFrame + ((int)200*random());
+	if(eMan.nextEvent <= 0){
+		eMan.endFrame = level.framenum + 600;
+		eMan.nextEvent = eMan.endFrame + 100;
 		e_randomEvent(EVE_CURR);
 		e_randomEvent(EVE_NEXT);
 	} else if (level.framenum > eMan.endFrame && level.framenum < eMan.nextEvent)
@@ -567,8 +645,8 @@ void e_eventSelect(){
 		eMan.eventArray[EVE_PREV] = eMan.eventArray[EVE_CURR];
 		eMan.eventArray[EVE_CURR] = eMan.eventArray[EVE_NEXT];
 		e_randomEvent(EVE_NEXT);
-		eMan.endFrame = level.framenum + e_randomMin();
-		eMan.nextEvent = eMan.endFrame + ((int)200*random());
+		eMan.endFrame = level.framenum + 600;
+		eMan.nextEvent = eMan.endFrame + 100;
 	}
 
 }

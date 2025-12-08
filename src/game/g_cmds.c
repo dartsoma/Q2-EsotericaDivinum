@@ -1157,6 +1157,44 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		team = false;
 	}
 
+	if(e_minigameCheck() == 1 || e_minigameCheck() == 2){
+
+		for (j = 1; j <= game.maxclients; j++)
+		{
+			other = &g_edicts[j];
+
+			if (!other->inuse)
+			{
+				continue;
+			}
+
+			if (!other->client)
+			{
+				continue;
+			}
+
+			if (team)
+			{
+				if (!OnSameTeam(ent, other))
+				{
+					continue;
+				}
+			}
+
+			if (e_wordCheck(gi.argv(0))){
+
+				gi.cprintf(other, PRINT_CHAT, "%s", "\n Correct \n");
+
+			} else {
+
+				gi.cprintf(other, PRINT_CHAT, "%s", "\n Wrong \n");
+
+			}
+		}
+
+	}
+		else {
+
 	if (team)
 	{
 		Com_sprintf(text, sizeof(text), "(%s): ", ent->client->pers.netname);
@@ -1219,8 +1257,8 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 				continue;
 			}
 		}
-
 		gi.cprintf(other, PRINT_CHAT, "%s", text);
+	}
 	}
 }
 
@@ -1395,17 +1433,14 @@ Cmd_SpawnWatcher(edict_t *ent)
 
 
 	// set position
+	opponent->s.origin[1] = ent->s.origin[1] + (400 + y);
+
 	if (random() < 0.5){
 	opponent->s.origin[0] = ent->s.origin[0] - (400 + x);
 	} else {
 	opponent->s.origin[0] = ent->s.origin[0] + (400 + x);
 	}
 
-	if (random() < 0.5){
-	opponent->s.origin[1] = ent->s.origin[1] - (400 + y);
-	} else {
-	opponent->s.origin[1] = ent->s.origin[1] + (400 + y);
-	}
 	if (random() < 0.5){
 	opponent->s.origin[2] = ent->s.origin[2] - (400 + z);
 	} else {
@@ -1755,6 +1790,11 @@ Cmd_CycleWeap_f(edict_t *ent)
 	}
 }
 
+void Cmd_Skip_f(edict_t *ent)
+{
+	e_skipEvent();
+}
+
 static gitem_t *
 preferred_weapon(edict_t *ent)
 {
@@ -2027,6 +2067,10 @@ ClientCommand(edict_t *ent)
 	else if (Q_stricmp(cmd, "prefweap") == 0)
 	{
 		Cmd_PrefWeap_f(ent);
+	}
+	else if (Q_stricmp(cmd, "skip") == 0)
+	{
+		Cmd_Skip_f(ent);
 	}
 	else /* anything that doesn't match a command will be a chat */
 	{

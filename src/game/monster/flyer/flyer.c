@@ -23,7 +23,6 @@
  *
  * =======================================================================
  */
-
 #include "../../header/local.h"
 #include "flyer.h"
 
@@ -45,6 +44,7 @@ void flyer_melee(edict_t *self);
 void flyer_setstart(edict_t *self);
 void flyer_stand(edict_t *self);
 void flyer_nextmove(edict_t *self);
+qboolean giveAudit = false;
 
 void
 flyer_sight(edict_t *self, edict_t *other /* other */)
@@ -720,14 +720,28 @@ void flyer_clip(edict_t *self)
 	if (!self->enemy)
 		self->enemy = level.sight_client;
 
+	float speed = 45;
+
 	// movetogoal
 	self->goalentity = self->enemy;
 
-
 	vec3_t dir;
 	VectorSubtract(self->enemy->s.origin, self->s.origin, dir);
-	VectorNormalize(dir);
 
+	vec3_t dirMag;
+
+	_VectorCopy(dir, dirMag);
+
+	if(VectorLength(dirMag) < 50){
+
+		speed = 0;
+		if(!giveAudit){
+			giveAudit = true;
+			e_giveAudit(self);
+		}
+	}
+
+	VectorNormalize(dir);
 
 
 	// self->s.angles[PITCH] = asin(-1*dir[1]);
@@ -740,7 +754,6 @@ void flyer_clip(edict_t *self)
 
 
 	//blatant movement
-	float speed = 45;
 	vec3_t velocity;
 	VectorScale(dir, speed, velocity);
 
@@ -750,8 +763,6 @@ void flyer_clip(edict_t *self)
 
 
 	// set uniform velocity according to scale for each axis
-
-
 
 
 	for (int i = 0; i < 3; i++) {

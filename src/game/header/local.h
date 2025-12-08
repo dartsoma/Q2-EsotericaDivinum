@@ -277,12 +277,27 @@ typedef struct {
 
 // I need to nest e_node using the initilized version of it
 
+typedef enum {
+	NONE = -1,
+	TYPING = 0,
+	ACTION = 1,
+	QUIZ = 2
+} minigame_t;
+
+typedef struct {
+	int req; // Completion value
+	int curr; // Current value of completion
+	minigame_t type;
+} e_audit_t;
+
 typedef struct {
 	e_events_t *eventArray;
 	int endFrame;
 	int nextEvent;
 	qboolean intermission;
+	e_audit_t *currAudit;
 } e_manager_t;
+
 
 #define EVE_NEXT 2
 #define EVE_CURR 1
@@ -295,6 +310,12 @@ char* e_eventDesc(void);
 int e_objectiveNumber(void);
 int e_objectiveTotal(void);
 char* e_objectiveName(void);
+int e_minigameCheck(void);
+qboolean e_wordCheck(char* s);
+extern void e_giveAudit(edict_t *e);
+void e_skipEvent(void);
+
+
 
 
 /* this structure is left intact through an entire game
