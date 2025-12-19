@@ -46,6 +46,7 @@ void flyer_stand(edict_t *self);
 void flyer_nextmove(edict_t *self);
 qboolean giveAudit = false;
 
+
 void
 flyer_sight(edict_t *self, edict_t *other /* other */)
 {
@@ -720,8 +721,6 @@ void flyer_clip(edict_t *self)
 	if (!self->enemy)
 		self->enemy = level.sight_client;
 
-	float speed = 45;
-
 	// movetogoal
 	self->goalentity = self->enemy;
 
@@ -732,6 +731,16 @@ void flyer_clip(edict_t *self)
 
 	_VectorCopy(dir, dirMag);
 
+		float speed = 50;
+
+	if(VectorLength(dirMag) < 500 && e_isRepulsing()){
+
+		e_flyerRepulsed(self);
+
+	}
+
+
+
 	if(VectorLength(dirMag) < 50){
 
 		speed = 0;
@@ -741,14 +750,15 @@ void flyer_clip(edict_t *self)
 		}
 	}
 
+	if(giveAudit){
+		giveAudit = false;
+	}
+
 	VectorNormalize(dir);
 
 
-	// self->s.angles[PITCH] = asin(-1*dir[1]);
-	// self->s.angles[YAW] = atan2(dir[1],dir[2]);
-
-	self->s.angles[PITCH] = (int) random()*100 * FRAMETIME;
-	self->s.angles[YAW] = (int) random()*100*FRAMETIME;
+	self->s.angles[PITCH] = asin(-1*dir[1]) * FRAMETIME;
+	self->s.angles[YAW] = atan2(dir[1],dir[2]) * FRAMETIME;
 
 	VectorNormalize(dir);
 

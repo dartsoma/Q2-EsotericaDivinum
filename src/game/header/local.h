@@ -269,9 +269,8 @@ typedef struct {
 	char eventName[50];
 	char eventDesc[512];
 	char objectiveType[50];
-	int objectiveNum;
 	int objectiveTotal;
-	float weight;
+	double weight;
 
 } e_events_t;
 
@@ -310,13 +309,25 @@ char* e_eventDesc(void);
 int e_objectiveNumber(void);
 int e_objectiveTotal(void);
 char* e_objectiveName(void);
-int e_minigameCheck(void);
+extern int e_minigameCheck(void);
 qboolean e_wordCheck(char* s);
 extern void e_giveAudit(edict_t *e);
+extern void e_presentDrop(edict_t *e, vec3_t loc);
 void e_skipEvent(void);
-
-
-
+void e_jumpCheck(void);
+qboolean e_isAuditing(void);
+char* getAuditPhrase(void);
+extern int e_eventID(void);
+extern void e_repulseCheck(void);
+extern qboolean e_isRepulsing(void);
+extern int e_chargeAmount(void);
+extern void e_changeNextEvent(int n);
+extern void e_flyerRepulsed(edict_t *e);
+extern void e_boringFail(void);
+extern void e_buff(void);
+extern void e_debuff(void);
+extern void e_slowtime(void);
+extern int e_slowtimeCD(void);
 
 /* this structure is left intact through an entire game
    it should be initialized at dll load time, and read/written to

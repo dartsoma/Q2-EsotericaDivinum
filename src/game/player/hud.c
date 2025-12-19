@@ -343,6 +343,8 @@ HelpComputerMessage(edict_t *ent)
 {
 	char string[1024];
 	char *sk;
+	char* rpp = "Repulser";
+	char* tss = "Time Slow";
 
 	if (!ent)
 	{
@@ -372,16 +374,18 @@ HelpComputerMessage(edict_t *ent)
 			"xv 202 yv 12 string2 \"%s\" " /* skill */
 			"xv 0 yv 24 cstring2 \"%s\" " /* level name */
 			"xv 0 yv 54 cstring2 \"%s\" " /* help 1 */
-			"xv 0 yv 105 cstring2 \" Complete missions \n to stay alive \n watch out for ghosts \" " /* help 2 */
+			"xv 0 yv 105 cstring2 \" Press H to Repulse Ghosts \n Repulsers kill ghosts \n Do events or DIE!!! \" " /* help 2 */
 			"xv 50 yv 164 string2 \"%s\""
-			"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ",
+			"xv 50 yv 164 string2 \"          %s\""
+			"xv 50 yv 164 string2 \"                   %s\""
+			"xv 50 yv 172 string2 \"%3i/%3i     %i       %i ",
 			sk,
 			e_eventName(),
 			e_eventDesc(),
-			e_objectiveName(),
+			e_objectiveName(), rpp, tss,
 			e_objectiveNumber(), e_objectiveTotal(),
-			level.found_goals, level.total_goals,
-			level.found_secrets, level.total_secrets);
+			e_chargeAmount(),
+			e_slowtimeCD());
 
 	gi.WriteByte(svc_layout);
 	gi.WriteString(string);

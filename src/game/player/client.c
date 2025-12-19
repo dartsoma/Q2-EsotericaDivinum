@@ -2294,6 +2294,7 @@ ClientThink(edict_t *ent, usercmd_t *ucmd)
 		{
 			gi.sound(ent, CHAN_VOICE, gi.soundindex(
 							"*jump1.wav"), 1, ATTN_NORM, 0);
+			gi.AddCommandString("jumpcheck\n");
 			PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
 		}
 

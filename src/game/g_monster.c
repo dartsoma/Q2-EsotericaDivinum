@@ -729,6 +729,10 @@ monster_death_use(edict_t *self)
 	{
 		return;
 	}
+	if (e_eventID() == 365){
+	e_presentDrop(self, self->s.origin);
+
+	}
 
 	self->flags &= ~(FL_FLY | FL_SWIM);
 	self->monsterinfo.aiflags &= AI_GOOD_GUY;

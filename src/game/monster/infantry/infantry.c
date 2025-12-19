@@ -524,6 +524,8 @@ infantry_die(edict_t *self, edict_t *inflictor /* unused */,
 		return;
 	}
 
+		e_presentDrop(self, self->s.origin);
+
 	/* check for gib */
 	if (self->health <= self->gib_health)
 	{

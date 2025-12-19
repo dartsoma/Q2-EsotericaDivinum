@@ -1123,8 +1123,8 @@ Blaster_Fire(edict_t *ent, vec3_t g_offset, int damage,
 
 	// Coffee - This is where my code is
 
-	// fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
-	fire_rocket(ent, start, forward, 0, 650, 100, -50);
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+	// fire_rocket(ent, start, forward, 0, 650, 100, -50);
 
 	/* send muzzle flash */
 	gi.WriteByte(svc_muzzleflash);

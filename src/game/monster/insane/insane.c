@@ -886,6 +886,8 @@ insane_die(edict_t *self, edict_t *inflictor /* unused */,
 		return;
 	}
 
+		e_presentDrop(self, self->s.origin);
+
 	if (self->health <= self->gib_health)
 	{
 		gi.sound(self, CHAN_VOICE, gi.soundindex( "misc/udeath.wav"), 1, ATTN_IDLE, 0);

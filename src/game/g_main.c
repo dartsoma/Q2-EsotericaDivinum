@@ -90,29 +90,47 @@ cvar_t *aimfix;
 cvar_t *g_machinegun_norecoil;
 cvar_t *g_swap_speed;
 
-e_events_t ESO_NOTHING = { 0, "Nothing", "", "", 0, 0, 0};
-e_events_t ESO_POSESSED = { 444, "Possessed","Comply will all \n audits for the \n duration\n", "Audits", 0, 10, 0.8};
-e_events_t ESO_BIRTHDAY = { 365, "Birthday", "Collect your presents\n from the bowels\n of the enemy\n", "Presents", 0, 20, 0.365};
-e_events_t ESO_AUDITDAY = { 373, "Auditing Day", "Get touched by\n as few ghosts as possible,\n more watcher spawns\n", "Times Hit", 0, 3, 0.2 };
-e_events_t ESO_BORING = { 111, "Boring", "Don't do anything\n", "n/a", 0, 0, 0.5 };
-e_events_t ESO_GHOSTBUSTERS = { 800, "Ghostbusters", "Kill watchers", "Watchers Killed", 0, 15, 0.01 };
+e_events_t ESO_NOTHING = { 0, "Nothing", "", "", 0, 0};
+e_events_t ESO_POSESSED = { 444, "Possessed","Comply will all \n audits for the \n duration\n", "Audits", 3, 0.5};
+e_events_t ESO_BIRTHDAY = { 365, "Birthday", "Collect your presents\n from the bowels\n of the enemy\n", "Presents", 10, 2};
+e_events_t ESO_AUDITDAY = { 373, "Auditing Day", "Get touched by\n as few ghosts as possible,\n more watcher spawns\n", "Times Hit", 3, 0.25 };
+e_events_t ESO_BORING = { 111, "Boring", "No killing\n", "", 0, 0.40 };
+e_events_t ESO_GHOSTBUSTERS = { 800, "Ghostbusters", "Repulse Watchers", "Hit", 3, 1 };
 
-e_audit_t AUD_CURR = {0, 0, 0};
+int repulseCooldown = 0;
+qboolean repulseDebounce = false;
+qboolean repulsing = false;
+int eventReq = 0;
+int auditTimer = 0;
+qboolean spawnDebounce = false;
+qboolean initDebounce = false;
+int lastPulse = 0;
+int lastPulse2 = 0;
+qboolean eventIgnore = false;
+e_audit_t AUD_CURR = {0, 0, -1};
+
+
 
 e_audit_t AUD_NONE = {0, 0, -1};
-e_audit_t AUD_TYPING = {3, 0, 0};
-e_audit_t AUD_ACTION = {1, 0, 1};
-e_audit_t AUD_QUIZ = {5, 0, 2};
+e_audit_t AUD_TYPING = {1, 0, 0};
+e_audit_t AUD_ACTION = {5, 0, 1};
+e_audit_t AUD_QUIZ = {1, 0, 2};
+
+int buffLevel = 0;
+int debuffLevel = 0;
+int timeSlowDuration = 0;
+int timeSlowCooldown = 0;
+
 
 e_events_t eEve[3];
 e_manager_t eMan = {eEve, 0, -1, false, &AUD_CURR};
 
 const char* quiz[5] = {"Orange Juice or Apple Juice?", "What game is this?", "What grade will this mod get?", "What are the flying ghosts called?", "Linux or Windows?"};
-const char* qAnswer[5] = {"Cranberry", "Quake 2", "A+" , "Watchers", "Whatever you are paid to use"};
+const char* qAnswer[5] = {"Cranberry", "Quake2", "A+" , "Watchers", "Whateveryouarepaidtouse"};
 const char* spelling[7] = {"supercalifragilisticexpialidocious", "mississipi", "sequoia", "honorificabilitudinitatibus", "incomprehensibilities", "llIIIIllIlIlIlIllIlIlllII", "antidisestablishmentarianism"};
 
-char* auditPhrase;
-
+char* auditPhrase = "";
+qboolean isAuditing;
 
 void e_eventUpdate(void);
 void e_eventSelect(void);
@@ -488,6 +506,11 @@ char* e_eventName(void){
 	return eMan.eventArray[EVE_CURR].eventName;
 }
 
+int e_eventID(){
+
+	return eMan.eventArray[EVE_CURR].eventID;
+}
+
 char* e_eventDesc(void){
 
 	return eMan.eventArray[EVE_CURR].eventDesc;
@@ -500,7 +523,7 @@ char* e_objectiveName(void){
 
 int e_objectiveNumber(void){
 
-	return eMan.eventArray[EVE_CURR].objectiveNum;
+	return eventReq;
 }
 
 int e_objectiveTotal(void){
@@ -508,147 +531,527 @@ int e_objectiveTotal(void){
 	return eMan.eventArray[EVE_CURR].objectiveTotal;
 }
 
-void e_eventUpdate(){
+char* getAuditPhrase(){
 
-		e_eventSelect();
-
-		return;
+	return auditPhrase;
 }
 
+void e_buff(){
+
+	switch (buffLevel){
+
+		case 0:
+			gi.AddCommandString("safesay Arsenal Increased\n");
+			gi.AddCommandString("give all\n");
+
+			break;
+		case 1:
+			gi.AddCommandString("safesay You are blessed by David Goggin\n");
+			gi.AddCommandString("cl_forwardspeed 250\n");
+			break;
+		case 2:
+			gi.AddCommandString("safesay Anti Gravity Boots Installed\n");
+			gi.AddCommandString("sv_gravity 300\n");
+			break;
+		case 3:
+			gi.AddCommandString("safesay You can control time: (Press G)\n");
+			gi.AddCommandString("bind g \"timeslow\" \n");
+			break;
+		case 4:
+			gi.AddCommandString("safesay Events dont matter anymore. Complete the Level!\n");
+			eventIgnore = true;
+
+			break;
+
+		default:
+
+			break;
+	}
+
+	buffLevel++;
+
+}
+
+void e_debuff(){
+
+	switch (debuffLevel){
+
+		case 0:
+			gi.AddCommandString("safesay Stop Panicking\n");
+			gi.AddCommandString("timescale 1.5\n");
+
+			break;
+		case 1:
+			gi.AddCommandString("safesay You are left handed\n");
+			gi.AddCommandString("hand 1\n");
+			break;
+		case 2:
+			gi.AddCommandString("safesay You broke a leg\n");
+			gi.AddCommandString("sv_gravity 9999\n");
+			gi.AddCommandString("cl_forwardspeed 100\n");
+			break;
+		case 3:
+			gi.AddCommandString("safesay You might need glasses\n");
+			gi.AddCommandString("fov 45\n");
+			gi.AddCommandString("cl_entities 45\n");
+			break;
+		case 4:
+			gi.AddCommandString("safesay You are a conscientious objector\n");
+			gi.AddCommandString("unbind mouse1\n");
+
+			break;
+
+		default:
+
+			break;
+	}
+
+	debuffLevel++;
+
+}
+
+
+
+
+void e_changeNextEvent(int n){
+
+	switch(n){
+
+		case 800:
+			eMan.eventArray[EVE_NEXT] = ESO_GHOSTBUSTERS;
+			break;
+		case 373:
+			eMan.eventArray[EVE_NEXT] = ESO_POSESSED;
+			break;
+		case 365:
+			eMan.eventArray[EVE_NEXT] = ESO_BIRTHDAY;
+			break;
+		case 444:
+			eMan.eventArray[EVE_NEXT] = ESO_AUDITDAY;
+			break;
+		case 111:
+			eMan.eventArray[EVE_NEXT] = ESO_BORING;
+			break;
+		default:
+			eMan.eventArray[EVE_NEXT] = ESO_NOTHING;
+			break;
+	}
+
+}
+
+
+
+void e_boringFail(){
+
+	eventReq++;
+	gi.AddCommandString("skip \n");
+
+}
+
+void winLoss(){
+
+	// Boring, AuditDay
+	if(e_eventID() == 111 || e_eventID() == 800){
+		if(eMan.eventArray[EVE_CURR].objectiveTotal > eventReq){
+
+		gi.AddCommandString("safesay Event Complete \n");
+		e_buff();
+
+	} else {
+		gi.AddCommandString("safesay Event Failed \n");
+		if(!eventIgnore){
+			gi.AddCommandString("kill\n");
+
+
+		}
+	}
+
+	return;
+	}
+	// Presents, Ghostbuster, Possessed
+	if(eMan.eventArray[EVE_CURR].objectiveTotal <= eventReq) {
+
+		gi.AddCommandString("safesay Event Complete \n");
+		e_buff();
+	} else {
+
+		gi.AddCommandString("safesay Event Failed \n");
+		if(!eventIgnore){
+			gi.AddCommandString("kill\n");
+
+		}
+	}
+
+}
+
+
+void e_eventUpdate(){
+
+	e_eventSelect();
+
+	if (isAuditing == true) {
+
+		if(auditTimer < level.framenum){
+
+			gi.AddCommandString("say Audit FAILED! \n");
+			e_debuff();
+			isAuditing = false;
+		}
+		if(AUD_CURR.curr >= AUD_CURR.req){
+			gi.AddCommandString("say Audit PASSED! \n");
+			if (e_eventID() == 444){
+				eventReq++;
+			}
+			isAuditing = false;
+		}
+
+	}
+
+	if(timeSlowDuration < level.framenum && level.framenum - timeSlowDuration >= 10){
+
+		gi.AddCommandString("timescale 1\n");
+	}
+
+	if (level.framenum%3==0){
+		if (timeSlowCooldown < 100 && (timeSlowDuration < level.framenum) && lastPulse2 != level.framenum){
+			lastPulse2 = level.framenum;
+			timeSlowCooldown+=2;
+		}
+		if (repulseCooldown < 100 && !repulseDebounce) {
+			repulseCooldown+=2;
+			repulseDebounce = true;
+		}
+	} else {
+
+		if(level.framenum < lastPulse && repulseDebounce){
+			repulsing = false;
+		}
+
+		repulseDebounce = false;
+	}
+
+	if (eMan.intermission == false && level.framenum % 150 == 0 && !spawnDebounce){
+
+		gi.AddCommandString("spawnwatcher\n");
+		spawnDebounce = true;
+		return;
+	}
+	if (level.framenum % 150 == 10){
+	spawnDebounce = false;
+	}
+
+	return;
+}
+
+void e_presentDrop(edict_t *e, vec3_t loc){
+
+	char s[70] = {0};
+	char x[32] = {0};
+	char y[32] = {0};
+	char z[32] = {0};
+
+	sprintf(x, "%f", loc[0]);
+	sprintf(y, "%f", loc[1]);
+	sprintf(z, "%f", loc[2]);
+
+	strcat(s, "spawnpresent ");
+	strcat(s, x);
+	strcat(s, " ");
+	strcat(s, y);
+	strcat(s, " ");
+	strcat(s, z);
+	strcat(s, "\n");
+
+	if (e_eventID() == 365){
+		eventReq++;
+	}
+
+	gi.AddCommandString("safesay Ouch! \n");
+	gi.AddCommandString(s);
+}
 
 int e_minigameCheck(){
 
 	return eMan.currAudit->type;
 }
 
+
+
 qboolean e_wordCheck(char* s){
 
-if (s == auditPhrase){
+	char str[256] = {0};
+
+	strcat(str, auditPhrase);
+
+
+if (strcmp(s, str)==0){
+
+	gi.AddCommandString("toggleconsole\n");
+
+	AUD_CURR.curr++;
 
 	return true;
 
-}
+} else {
+
+
+	gi.AddCommandString("toggleconsole\n");
+
 
 return false;
+}
 
 }
 
+
+void e_jumpCheck(){
+	if(AUD_CURR.type == 1){
+		AUD_CURR.curr++;
+	}
+}
+
+void e_flyerRepulsed(edict_t *e){
+
+	if (!e) {
+		return;
+	}
+	if (e_eventID() == 800){
+		eventReq++;
+	}
+
+	gi.AddCommandString("safesay Watcher Killed \n");
+
+	G_FreeEdict(e);
+
+	lastPulse = level.framenum + 10;
+}
 
 void e_giveAudit(edict_t *e){
 
-	int randomNum = (int) (random()*3);
+	char s[256] = {0};
+	int randomNum;
+	isAuditing = false;
 
-	switch(randomNum)	{
+	if(e_eventID() ==373 || e_eventID() == 444){
+		eventReq++;
+	}
+
+
+	switch (AUD_CURR.type)	{
 
 		case 0:
-			AUD_CURR = AUD_TYPING;
-			break;
-		case 1:
 			AUD_CURR = AUD_ACTION;
 			break;
-		case 2:
+		case 1:
 			AUD_CURR = AUD_QUIZ;
+			break;
+		case 2:
+			AUD_CURR = AUD_TYPING;
+			break;
 		default:
 			AUD_CURR = AUD_TYPING;
 			break;
 	}
 
-	switch(AUD_CURR.type){
+	switch (AUD_CURR.type){
 
-		case 0:
+		case 2:
 
-			randomNum = (int) random()*7;
+			randomNum = (int)(random()*5);
 
 			auditPhrase = quiz[randomNum];
 
 			gi.AddCommandString("toggleconsole\n");
 
+			strcat(s,"safesay ");
+			strcat(s, auditPhrase);
+			auditPhrase = qAnswer[randomNum];
+			strcat(s, "\n");
+			gi.AddCommandString(s);
+
+
+			auditTimer = level.framenum + 2;
+
+			isAuditing = true;
+
+
+
 		break;
 
 		case 1:
 
+		gi.AddCommandString("safesay Jump 5 Times\n");
+
+			auditTimer = level.framenum + 60;
+
+			isAuditing = true;
 
 
 		break;
 
-		case 2:
+		case 0:
 
-			randomNum = (int) random()*5;
+			randomNum = (int) (random()*7);
 
 			auditPhrase = spelling[randomNum];
 
 			gi.AddCommandString("toggleconsole\n");
 
+			strcat(s,"safesay ");
+			strcat(s,"Spell: ");
+			strcat(s,auditPhrase);
+			strcat(s,"\n");
+			gi.AddCommandString(s);
+
+			auditTimer = level.framenum + 2 ;
+
+			isAuditing = true;
+
 		break;
 	}
-
 
 	G_FreeEdict(e);
 }
 
 
-void e_randomEvent(int eventslot){
+void e_cycleEvent(int eventslot){
 
-	int randomNum = (int) (random()*5);
+	switch(eMan.eventArray[eventslot-1].eventID){
 
-	switch(randomNum){
-
-		case 0:
-			eMan.eventArray[eventslot] = ESO_POSESSED;
-			break;
-		case 1:
-			eMan.eventArray[eventslot] = ESO_BIRTHDAY;
-			break;
-		case 2:
-			eMan.eventArray[eventslot] = ESO_AUDITDAY;
-			break;
-		case 3:
-			eMan.eventArray[eventslot] = ESO_BORING;
-			break;
-		case 4:
+		case 365:
 			eMan.eventArray[eventslot] = ESO_GHOSTBUSTERS;
 			break;
+		case 444:
+			eMan.eventArray[eventslot] = ESO_POSESSED;
+			break;
+		case 373:
+			eMan.eventArray[eventslot] = ESO_BIRTHDAY;
+			break;
+		case 111:
+			eMan.eventArray[eventslot] = ESO_AUDITDAY;
+			break;
+		case 800:
+			eMan.eventArray[eventslot] = ESO_BORING;
+			break;
 		default:
-			eMan.eventArray[eventslot] = ESO_NOTHING;
+			eMan.eventArray[eventslot] = ESO_BIRTHDAY;
 			break;
 	}
 }
-
+qboolean e_isAuditing(){
+	return isAuditing;
+}
 
 void e_skipEvent(){
 
 	if (eMan.intermission){
 		eMan.nextEvent = level.framenum + 10;
-		eMan.endFrame = level.framenum + 610;
 	} else {
 
 		eMan.endFrame = level.framenum + 10;
 		eMan.nextEvent = level.framenum + 100;
 	}
-
+	return;
 }
 
 void e_eventSelect(){
 
 	// intiial event
 	if(eMan.nextEvent <= 0){
-		eMan.endFrame = level.framenum + 600;
+		e_cycleEvent(EVE_CURR);
+		e_cycleEvent(EVE_NEXT);
+		eMan.endFrame = level.framenum + 600*eMan.eventArray[EVE_CURR].weight + 10;
 		eMan.nextEvent = eMan.endFrame + 100;
-		e_randomEvent(EVE_CURR);
-		e_randomEvent(EVE_NEXT);
 	} else if (level.framenum > eMan.endFrame && level.framenum < eMan.nextEvent)
 	// event transition
 	{
-		eMan.intermission = true;
+		if(!eMan.intermission){
+			winLoss();
+			eMan.intermission = true;
+		}
 	} else if (level.framenum >= eMan.nextEvent){
+		eventReq = 0;
 		eMan.intermission = false;
 		eMan.eventArray[EVE_PREV] = eMan.eventArray[EVE_CURR];
 		eMan.eventArray[EVE_CURR] = eMan.eventArray[EVE_NEXT];
-		e_randomEvent(EVE_NEXT);
-		eMan.endFrame = level.framenum + 600;
+		e_cycleEvent(EVE_NEXT);
+		eMan.endFrame = level.framenum + 600*eMan.eventArray[EVE_CURR].weight + 10;
 		eMan.nextEvent = eMan.endFrame + 100;
 	}
 
+}
+int e_chargeAmount(){
+
+	return repulseCooldown;
+}
+
+qboolean e_isRepulsing(){
+
+	return repulsing;
+}
+
+
+
+
+void e_repulseCheck(){
+	// get player
+	int j;
+
+	edict_t *ent;
+
+	for (j = 1; j <= game.maxclients; j++)
+	{
+		ent = &g_edicts[j];
+	}
+
+	if(repulseCooldown >= 100){
+		repulsing = true;
+		repulseCooldown = 0;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex(
+			"weapons/railgf1a.wav"), 1, ATTN_NORM, 0);
+		return;
+	} else {
+		gi.sound(ent, CHAN_VOICE, gi.soundindex(
+			"weapons/noammo.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
+}
+
+int e_slowtimeCD(){
+
+	return timeSlowCooldown;
+}
+
+void e_slowtime(){
+	// get player
+	int j;
+
+	edict_t *ent;
+
+	for (j = 1; j <= game.maxclients; j++)
+	{
+		ent = &g_edicts[j];
+	}
+
+	if(timeSlowCooldown >= 100){
+
+		timeSlowCooldown = 0;
+		timeSlowDuration = level.framenum + 5;
+		gi.AddCommandString("timescale 0.65\n");
+		gi.sound(ent, CHAN_VOICE, gi.soundindex(
+			"weapons/plasshot.wav"), 1, ATTN_NORM, 0);
+		return;
+	} else if (timeSlowDuration > level.framenum){
+		gi.AddCommandString("timescale 1\n");
+		timeSlowDuration = level.framenum - 11;
+		gi.sound(ent, CHAN_VOICE, gi.soundindex(
+			"weapons/disint2.wav"), 1, ATTN_NORM, 0);
+		return;
+	} else {
+		gi.sound(ent, CHAN_VOICE, gi.soundindex(
+			"weapons/noammo.wav"), 1, ATTN_NORM, 0);
+		return;
+	}
 }
 
 
@@ -660,10 +1063,22 @@ G_RunFrame(void)
 
 
 
-
 	level.framenum++;
 	level.time = level.framenum * FRAMETIME;
 
+	if (!initDebounce){
+	gi.AddCommandString("bind h \"repulse\" \n");
+	gi.AddCommandString("god \n");
+	gi.AddCommandString("bind mouse1 +attack \n");
+	gi.AddCommandString("fov 90\n");
+	gi.AddCommandString("cl_forwardspeed 200\n");
+	gi.AddCommandString("hand 0\n");
+	gi.AddCommandString("sv_gravity 800\n");
+		gi.AddCommandString("unbind g \n");
+		gi.AddCommandString("timescale 1\n");
+		gi.AddCommandString("sv_cheats 1\n");
+	initDebounce = true;
+	}
 
 	gibsthisframe = 0;
 	debristhisframe = 0;
@@ -695,6 +1110,7 @@ G_RunFrame(void)
 		VectorCopy(ent->s.origin, ent->s.old_origin);
 
 		e_eventUpdate();
+
 
 		/* if the ground entity moved, make sure we are still on it */
 		if ((ent->groundentity) &&

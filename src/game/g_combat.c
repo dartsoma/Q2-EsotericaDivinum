@@ -135,6 +135,13 @@ Killed(edict_t *targ, edict_t *inflictor, edict_t *attacker,
 		{
 			level.killed_monsters++;
 
+			if(e_eventID() == 111){
+
+				e_boringFail();
+
+			}
+
+
 			if (coop->value && attacker->client)
 			{
 				attacker->client->resp.score++;

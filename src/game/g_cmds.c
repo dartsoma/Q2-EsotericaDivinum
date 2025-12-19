@@ -1129,6 +1129,89 @@ flooded(edict_t *ent)
 	return false;
 }
 
+void Cmd_Repulse(edict_t *ent){
+
+	e_repulseCheck();
+
+}
+
+void Cmd_NextEvent(edict_t *ent){
+
+	e_changeNextEvent(atoi(gi.argv(1)));
+
+}
+
+void Cmd_Buff(edict_t *ent){
+
+	e_buff();
+
+}
+void Cmd_Debuff(edict_t *ent){
+
+	e_debuff();
+
+}
+void Cmd_SlowTime(edict_t *ent){
+
+	e_slowtime();
+
+}
+
+void Cmd_RepulseCheck(){
+	int j;
+	edict_t *other;
+	for (j = 1; j <= game.maxclients; j++)
+	{
+		other = &g_edicts[j];
+		gi.cprintf(other, PRINT_CHAT, "%d", e_chargeAmount());
+
+	}
+}
+
+void Cmd_SafeSay_f(edict_t *ent){
+
+	int j;
+	edict_t *other;
+	char *p;
+	char text[2048];
+
+
+			p = gi.args();
+
+			if (*p == '"')
+			{
+				p++;
+				p[strlen(p) - 1] = 0;
+			}
+
+			strcat(text, p);
+
+		if (strlen(text) > 150)
+		{
+			text[150] = 0;
+		}
+
+		strcat(text, "\n");
+
+
+	for (j = 1; j <= game.maxclients; j++)
+	{
+		other = &g_edicts[j];
+
+		if (!other->inuse)
+		{
+			continue;
+		}
+
+		if (!other->client)
+		{
+			continue;
+		}
+
+		gi.cprintf(other, PRINT_CHAT, "%s", text);
+	}
+}
+
 void
 Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 {
@@ -1157,8 +1240,6 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		team = false;
 	}
 
-	if(e_minigameCheck() == 1 || e_minigameCheck() == 2){
-
 		for (j = 1; j <= game.maxclients; j++)
 		{
 			other = &g_edicts[j];
@@ -1181,19 +1262,17 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 				}
 			}
 
-			if (e_wordCheck(gi.argv(0))){
-
+			if (e_isAuditing() && (e_minigameCheck() == 2 || e_minigameCheck() == 0)){
+				if(e_wordCheck(gi.argv(0))){
 				gi.cprintf(other, PRINT_CHAT, "%s", "\n Correct \n");
-
-			} else {
-
+				return;
+				} else {
 				gi.cprintf(other, PRINT_CHAT, "%s", "\n Wrong \n");
-
+				return;
 			}
 		}
 
-	}
-		else {
+
 
 	if (team)
 	{
@@ -1235,7 +1314,7 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	{
 		gi.cprintf(NULL, PRINT_CHAT, "%s", text);
 	}
-
+		}
 	for (j = 1; j <= game.maxclients; j++)
 	{
 		other = &g_edicts[j];
@@ -1258,7 +1337,6 @@ Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 			}
 		}
 		gi.cprintf(other, PRINT_CHAT, "%s", text);
-	}
 	}
 }
 
@@ -1420,6 +1498,25 @@ Cmd_SpawnOnStartByClass(char *classname, const vec3_t origin)
 		origin[0], origin[1], origin[2]);
 }
 
+static void
+Cmd_SpawnPresent(edict_t *ent)
+{
+
+	edict_t *present = G_Spawn();
+
+	// y
+	present->s.origin[1] = atof(gi.argv(2));
+
+	// x
+	present->s.origin[0] = atof(gi.argv(1));
+	// z
+	present->s.origin[2] = atof(gi.argv(3));
+
+	// and class
+	present->classname = G_CopyString("item_armor_shard");
+
+	ED_CallSpawn(present);
+}
 
 static void
 Cmd_SpawnWatcher(edict_t *ent)
@@ -1433,18 +1530,18 @@ Cmd_SpawnWatcher(edict_t *ent)
 
 
 	// set position
-	opponent->s.origin[1] = ent->s.origin[1] + (400 + y);
+	opponent->s.origin[1] = ent->s.origin[1] + (500 + y);
 
 	if (random() < 0.5){
-	opponent->s.origin[0] = ent->s.origin[0] - (400 + x);
+	opponent->s.origin[0] = ent->s.origin[0] - (500 + x);
 	} else {
-	opponent->s.origin[0] = ent->s.origin[0] + (400 + x);
+	opponent->s.origin[0] = ent->s.origin[0] + (500 + x);
 	}
 
 	if (random() < 0.5){
-	opponent->s.origin[2] = ent->s.origin[2] - (400 + z);
+	opponent->s.origin[2] = ent->s.origin[2] - (500 + z);
 	} else {
-	opponent->s.origin[2] = ent->s.origin[2] + (400 + z);
+	opponent->s.origin[2] = ent->s.origin[2] + (500 + z);
 	}
 
 	// and class
@@ -1452,8 +1549,7 @@ Cmd_SpawnWatcher(edict_t *ent)
 
 	ED_CallSpawn(opponent);
 
-	gi.dprintf("Spawned Watcher at %f %f %f\n",
-			  ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
+	gi.dprintf("A Watcher has arrived \n");
 }
 
 static void
@@ -1795,6 +1891,12 @@ void Cmd_Skip_f(edict_t *ent)
 	e_skipEvent();
 }
 
+void Cmd_JumpCheck_f(edict_t *ent)
+{
+	e_jumpCheck();
+}
+
+
 static gitem_t *
 preferred_weapon(edict_t *ent)
 {
@@ -2068,9 +2170,44 @@ ClientCommand(edict_t *ent)
 	{
 		Cmd_PrefWeap_f(ent);
 	}
+	else if (Q_stricmp(cmd, "jumpcheck") == 0)
+	{
+		Cmd_JumpCheck_f(ent);
+	}
 	else if (Q_stricmp(cmd, "skip") == 0)
 	{
 		Cmd_Skip_f(ent);
+	}
+	else if (Q_stricmp(cmd, "safesay") == 0)
+	{
+		Cmd_SafeSay_f(ent);
+	}
+	else if (Q_stricmp(cmd, "spawnpresent") == 0)
+	{
+		Cmd_SpawnPresent(ent);
+	}
+	else if (Q_stricmp(cmd, "repulse") == 0)
+	{
+		Cmd_Repulse(ent);
+	}	else if (Q_stricmp(cmd, "repulsecheck") == 0)
+	{
+		Cmd_RepulseCheck(ent);
+	}
+		else if (Q_stricmp(cmd, "nextevent") == 0)
+	{
+	Cmd_NextEvent(ent);
+	}
+	else if (Q_stricmp(cmd, "buff") == 0)
+	{
+		Cmd_Buff(ent);
+	}
+	else if (Q_stricmp(cmd, "debuff") == 0)
+	{
+		Cmd_Debuff(ent);
+	}
+	else if (Q_stricmp(cmd, "timeslow") == 0)
+	{
+		Cmd_SlowTime(ent);
 	}
 	else /* anything that doesn't match a command will be a chat */
 	{

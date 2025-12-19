@@ -501,6 +501,7 @@ gunner_die(edict_t *self, edict_t *inflictor /* unused */,
 		edict_t *attacker /* unused */, int damage /* unused */,
 		vec3_t point)
 {
+
 	int n;
 
 	if (!self)
@@ -509,6 +510,9 @@ gunner_die(edict_t *self, edict_t *inflictor /* unused */,
 	}
 
 	self->s.skinnum = 1;
+
+
+	e_presentDrop(self, self->s.origin);
 
 	/* check for gib */
 	if (self->health <= self->gib_health)

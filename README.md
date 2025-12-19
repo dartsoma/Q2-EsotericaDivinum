@@ -1,26 +1,33 @@
-# Yamagi Quake II
+# Esoterica Divinum (Quake 2 mod)
 
-Yamagi Quake II is an enhanced client for id Software's Quake
-II with focus on offline and coop gameplay. Both the gameplay and the graphics
-are unchanged, but many bugs in the last official release were fixed and some
-nice to have features like widescreen support and a modern OpenGL 3.2 renderer
-were added. Unlike most other Quake II source ports Yamagi Quake II is fully 64-bit
-clean. It works perfectly on modern processors and operating systems. Yamagi
-Quake II runs on nearly all common platforms; including FreeBSD, Linux, NetBSD,
-OpenBSD, Windows and macOS (experimental).
+Esoterica is a mod where random challenges are brought to the player that they must complete along the way to finishing a level. If criteria is not met within a timeframe the player will die. Subsequently Ghosts will chase the player and force them to play minigames. Buffs and debuffs will be rewarded with each failed minigame, or successful event.
 
-This code is built upon Icculus Quake II, which itself is based on Quake II
-3.21. Yamagi Quake II is released under the terms of the GPL version 2. See the
-LICENSE file for further information.
+These are the admin commands: 
 
-## Documentation
+buff
 
-Before asking any question, read through the documentation! The current
-version can be found here: [doc/010_index.md](doc/010_index.md)
+nextevent [eventID]
 
-## Releases
+0, 444, 800, 111, 373, 365
 
-The official releases (including Windows binaries) can be found at our
-homepage: https://www.yamagi.org/quake2  
-**Unsupported** preview builds for Windows can be found at
-https://deponie.yamagi.org/quake2/misc/
+debuff
+
+skip
+
+spawnwatcher
+
+safesay
+
+timeslow
+
+repulse
+
+repulsecheck
+
+Controls - 
+
+H - Repulse
+
+G - [Locked Skill]
+
+To install simply dump file contents in quake 4 and use the ./quake2 shortcut
