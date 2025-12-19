@@ -651,7 +651,7 @@ void e_boringFail(){
 void winLoss(){
 
 	// Boring, AuditDay
-	if(e_eventID() == 111 || e_eventID() == 800){
+	if(e_eventID() == 111 || e_eventID() == 373){
 		if(eMan.eventArray[EVE_CURR].objectiveTotal > eventReq){
 
 		gi.AddCommandString("safesay Event Complete \n");
